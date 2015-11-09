@@ -52,12 +52,12 @@ for b=1:niter
     end
     P = exp(bsxfun(@minus,logP,logsumexp(logP)));
     
-    Ltrain(b) = crossEntropyLossGMM(W,net,Xtrain,P);
-    Ltest(b) = crossEntropyLossGMM(W,net,Xtest,Ptest);
+    Ltrain(b) = crossEntropyLoss(W,net,Xtrain,P);
+    Ltest(b) = crossEntropyLoss(W,net,Xtest,Ptest);
     Xhat_test = MAPGMM(Ytest,Ytest,GMM,noiseVar,paramMAP,Xtest);
     PSNR(b) = 20*log10(1./std2(Xhat_test-Xtest));
     fprintf('minibatch %d trainXE %f testXE %f gatingPSNR %f fullPSNR %f\n',b,Ltrain(b),Ltest(b),PSNR(b),PSNR0);
-    W = minimize(W(:),@crossEntropyLossGMM,-miniters,net,Xtrain,P);
+    W = minimize(W(:),@crossEntropyLoss,-miniters,net,Xtrain,P);
     net.theta = setNetworkWeights(W,GMM.net.theta);
     GMM.net = net;
     if exist('filename','var'), save(filename,'net','Ltrain','Ltest','PSNR'); end

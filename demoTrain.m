@@ -11,7 +11,7 @@ param.draw=1; % draw results
 % generate minibatches by loading random patches from all images 
 getData = @() loadImagePatches(trainPATH,[param.p,param.p],100000)/255-0.5;
 % train a 200 component GMM and save it to 'tmpModel.mat'
-GMM = trainGMM(200,getData,param,'tmpModel');
+GMM = trainGMM(200,getData,param,'tmpGMM');
 
 %% discriminative training of gating network
 % network architechture
@@ -25,5 +25,5 @@ net = neuNet(lspec, input_shape);
 getData = @() loadImagePatches(trainPATH,[param.p,param.p],10000)/255-0.5;
 testData = loadImagePatches(testPATH,[param.p,param.p],100000)/255-0.5;
 % train Gating network using the cross-entropy loss on 500 minibatches 
-net = trainGMMGatingNet(GMM,net,getData,testData,500,'tmpNet'); 
+net = trainGMMGatingNet(GMM,net,getData,testData,500,'tmpGatingNet'); 
 
