@@ -53,12 +53,19 @@ for i=1:length(betas)
     
     % minimize (2) 
     XZ = lambda*Aty+beta*pcount(i).*c2i(Zi,i);
-    [X,~] = bicg(@(x,tf) Afun(x,K,beta*pcount(i),lambda,imsize),XZ(:),1e-3,100,[],[],X(:));
+    [X,~] = bicg(@(x,tf) Afun(x,K,pcount(i),beta,lambda,imsize),XZ(:),1e-3,100,[],[],X(:));
     X = reshape(X,imsize);
-    
+    %X = mixI(c2i(Zi,i),Aty,K,lambda,beta,pcount(i),X);
 end
 
 resI =  X + 0.5;
+
+
+% mix the patch-average image with a deblurred image
+function X=mixI(Z,Aty,K,lambda,beta,pcount,X0)
+Z = pcount.*Z;
+[X,~] = bicg(@(x,tflag) Afun(x,K,beta.*pcount(i),lambda,size(X0)),(lambda*Aty(:)+beta*Z(:)),1e-3,100,[],[],X0(:));
+X = reshape(X,size(X0));
 
 % function to apply the corruption model (implemented efficiantly using
 % convolutions instead of matrix multiplications)
@@ -67,4 +74,4 @@ x = reshape(x,ss);
 tt = imfilter(x,K,'conv','same');
 tt = tt(floor(size(K,1)/2)+1:end-floor(size(K,1)/2),floor(size(K,2)/2)+1:end-floor(size(K,2)/2));
 y = lambda*imfilter(tt,rot90(rot90(K)),'conv','full');
-y = y(:) + betaCounts(:).*x(:);
+y = y(:) + betaCounts.*x(:);

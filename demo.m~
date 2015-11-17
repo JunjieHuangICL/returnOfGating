@@ -12,8 +12,8 @@ noiseVar = (25/255)^2;
 noisyI = origI + sqrt(noiseVar)*randn(size(origI));
 
 % denoise params
-stride = 3; % change for speed/accuracy tradeoff (might require update of lambda)
-lambdas = GMM.p^2/noiseVar/stride^2*[0.7,0.6,0.5,0.4];
+stride = 4; % change for speed/accuracy tradeoff (might require update of lambda)
+lambdas = GMM.p^2/noiseVar*[0.7,0.6,0.5,0.4]/stride^2;
 betas = [1,5,10,50]/noiseVar;
 % GMM patch denoising function handle
 patchMAP = @(Zi,noiseVar) MAPGMM(Zi,Zi,GMM,noiseVar,struct('T',3, 'hardEM',1, 'calcCost',0)); 
@@ -51,6 +51,7 @@ stride = 7;
 lambdas = GMM.p^2/noiseVar/stride^2;
 betas = 30*[1,2,4,16,64,128,256];
 patchMAP = @(Zi,noiseVar) MAPGMM(Zi,Zi,GMM,noiseVar,struct('T',2, 'hardEM',1, 'calcCost',0)); 
+%stride=1; lambdas = GMM.p^2/noiseVar;
 
 
 % deblur

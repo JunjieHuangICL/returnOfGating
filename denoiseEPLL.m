@@ -33,10 +33,9 @@ function [resI] = denoiseEPLL(Y, psize, patchMAP, lambdas, betas, stride)
 if ~exist('stride','var'), stride=1; end
 
 % init im2col/col2im handles
-[i2c,c2i] = fastIm2ColStrideHandle(size(Y),psize,stride,min(stride^2,length(betas)));
+[i2c,c2i,~,pcount] = fastIm2ColStrideHandle(size(Y),psize,stride,min(stride^2,length(betas)));
 
 % init data
-pp = prod(psize);
 Y = Y - 0.5;
 X = Y;
 
@@ -49,7 +48,7 @@ for i=1:length(betas)
     Zi = patchMAP(i2c(X,i),1/beta); 
     
     % minimize (2)
-    X = (pp*beta*c2i(Zi,i) + lambda*Y)./(pp*beta + lambda);
+    X = (beta*pcount(i).*c2i(Zi,i) + lambda*Y)./(beta.*pcount(i) + lambda);
     
 end
 
