@@ -21,17 +21,9 @@ else channels = 1; end;
 if (~exist('stride','var')), stride=1; end;
 if (~exist('N','var')), N=1; end;
 
-% create initial index map
-n = prod(imsize);
-i2cidx1 = im2col(reshape(1:n,imsize),psize);
-
-% duplicate for all channels
-if (channels>1)
-    channel_idx = reshape((0:channels-1)*n,[1,1,channels]);
-    i2cidx1 = bsxfun(@plus,repmat(i2cidx1,[1,1,channels]),channel_idx);
-    i2cidx1 = permute(i2cidx1,[1,3,2]);
-    i2cidx1 = reshape(i2cidx1,[size(i2cidx1,1)*size(i2cidx1,2),size(i2cidx1,3)]);
-end
+% create patch index map template
+[px,py]=meshgrid(1:psize(2),1:psize(1));
+pidx = py(:)+(px(:)-1)*imsize(1);
 
 % create N index maps with different offsets
 i2cidx=cell(N,1);
@@ -42,9 +34,10 @@ for n=1:N
     
     % modify according to stride and some random offset
     offset = [randi(stride),randi(stride)];
-    strideIdx = zeros(imsize(1)-psize(1)+1,imsize(2)-psize(2)+1);
-    strideIdx([1,offset(1):stride:end,end],[1,offset(2):stride:end,end]) = 1;
-    i2cidx{n} = i2cidx1(:,strideIdx(:)==1);
+    yidx = [0,(offset(1)-1):stride:(imsize(1)-psize(1)-1),imsize(1)-psize(1)];
+    xidx = permute([0,(offset(2)-1):stride:(imsize(2)-psize(2)-1),imsize(2)-psize(2)],[1,3,2])*imsize(1);
+    i2cidx{n} = zeros(length(pidx),length(yidx),length(xidx));
+    i2cidx{n} = reshape(bsxfun(@plus,bsxfun(@plus,bsxfun(@plus,i2cidx{n},pidx),yidx),xidx),[length(pidx),length(yidx)*length(xidx)]);
 
             
     % create function handle
